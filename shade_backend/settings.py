@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-change-in-production'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1','shade.imcbs.com','www.shade.imcbs.com']
 
 # Application definition
 INSTALLED_APPS = [
@@ -153,11 +153,13 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5174",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
+    "https://shade.imcbs.com/"
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
+    "https://shade.imcbs.com/",
 ]
 
 # ==========================================

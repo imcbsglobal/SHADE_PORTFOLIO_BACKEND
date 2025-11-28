@@ -164,24 +164,24 @@ def admin_login(request):
     ip_address = get_client_ip(request)
     user_agent = request.META.get("HTTP_USER_AGENT", "")
 
-    if username == "imcbs" and password == "imcbs123":
+    if username == "imcbs" and password == "1234":
         user, created = DjangoUser.objects.get_or_create(
-            username="admin", defaults={"is_staff": True, "is_superuser": True}
+            username="imcbs", defaults={"is_staff": True, "is_superuser": True}
         )
 
         LoginHistory.objects.create(
             user=user,
-            username="admin",
+            username="imcbs",
             ip_address=ip_address,
             user_agent=user_agent,
             status="success",
         )
 
         request.session["user_id"] = user.id
-        request.session["username"] = "admin"
+        request.session["username"] = "imcbs"
 
         return Response(
-            {"message": "Admin login successful", "user": {"id": user.id, "username": "admin"}},
+            {"message": "Admin login successful", "user": {"id": user.id, "username": "imcbs"}},
             status=200,
         )
 

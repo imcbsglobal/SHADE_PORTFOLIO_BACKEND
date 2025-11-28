@@ -164,7 +164,7 @@ def admin_login(request):
     ip_address = get_client_ip(request)
     user_agent = request.META.get("HTTP_USER_AGENT", "")
 
-    if username == "admin" and password == "admin123":
+    if username == "imcbs" and password == "imcbs123":
         user, created = DjangoUser.objects.get_or_create(
             username="admin", defaults={"is_staff": True, "is_superuser": True}
         )

@@ -7,6 +7,7 @@ class User(models.Model):
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=15, unique=True)
     email = models.EmailField(blank=True, null=True)
+    password = models.CharField(max_length=255)  # ✅ ADDED PASSWORD FIELD
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

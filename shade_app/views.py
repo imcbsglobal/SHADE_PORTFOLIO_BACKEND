@@ -4,6 +4,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User as DjangoUser
+from django.contrib.auth.hashers import make_password, check_password
 from .models import User, Smile, OurClient, Ceremonial, LoginHistory, Demonstration
 from .serializers import (
     UserSerializer,
@@ -36,49 +37,63 @@ ADMIN_PHONE = "919072791379"
 
 
 # -------------------------------------------------------------------------
-# VISITOR REGISTRATION (Auto Login if Existing)
+# VISITOR REGISTRATION (From Popup - No Password Required)
 # -------------------------------------------------------------------------
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def register_visitor(request):
+    """
+    Simple visitor registration from popup
+    - No password required (uses default)
+    - Auto-login if phone already exists
+    """
     data = request.data
     name = data.get("name", "").strip()
     phone = data.get("phone", "").strip()
     email = data.get("email", "").strip()
 
+    # Validation
     if not name or not phone:
         return Response({"error": "Name and phone are required"}, status=400)
 
-    # Auto Login if phone exists
-    existing = User.objects.filter(phone=phone).first()
-    if existing:
-        request.session["visitor_id"] = existing.id
-        request.session["visitor_name"] = existing.name
+    # Check if visitor already exists - AUTO LOGIN
+    existing_user = User.objects.filter(phone=phone).first()
+    
+    if existing_user:
+        # User already exists - just return success (auto-login)
+        request.session["visitor_id"] = existing_user.id
+        request.session["visitor_name"] = existing_user.name
 
         return Response(
             {
-                "message": "Login successful",
+                "message": "Welcome back!",
                 "user": {
-                    "id": existing.id,
-                    "name": existing.name,
-                    "phone": existing.phone,
-                    "email": existing.email,
+                    "id": existing_user.id,
+                    "name": existing_user.name,
+                    "phone": existing_user.phone,
+                    "email": existing_user.email,
                 },
             },
             status=200,
         )
 
     try:
-        # Create new user
-        user = User.objects.create(name=name, phone=phone, email=email)
+        # Create new visitor with default password
+        user = User.objects.create(
+            name=name,
+            phone=phone,
+            email=email,
+            password=make_password("visitor123")  # Default password for popup visitors
+        )
 
-        # WhatsApp Notification
+        # WhatsApp Notification to Admin
         message = (
-            f"📢 New User Registered - Shade 💚!\n\n"
+            f"🔔 New Visitor - Shade 💚!\n\n"
             f"👤 Name: {name}\n"
             f"📞 Phone: {phone}\n"
-            f"📧 Email: {email if email else 'Not provided'}"
+            f"📧 Email: {email if email else 'Not provided'}\n\n"
+            f"✅ Time: {user.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
         )
 
         params = {
@@ -101,6 +116,82 @@ def register_visitor(request):
 
         return Response(
             {
+                "message": "Registration successful!",
+                "user": {
+                    "id": user.id,
+                    "name": user.name,
+                    "phone": user.phone,
+                    "email": user.email,
+                },
+            },
+            status=201,
+        )
+
+    except Exception as e:
+        print(f"Registration Error: {str(e)}")
+        return Response({"error": str(e)}, status=500)
+
+
+# -------------------------------------------------------------------------
+# USER REGISTRATION (From Registration Page - Password Required)
+# -------------------------------------------------------------------------
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def user_register(request):
+    """
+    User registration with password (from registration page)
+    """
+    data = request.data
+    name = data.get("name", "").strip()
+    phone = data.get("phone", "").strip()
+    email = data.get("email", "").strip()
+    password = data.get("password", "").strip()
+
+    # Validation
+    if not name or not phone or not password:
+        return Response({"error": "Name, phone, and password are required"}, status=400)
+
+    if len(password) < 6:
+        return Response({"error": "Password must be at least 6 characters"}, status=400)
+
+    # Check if phone already exists
+    if User.objects.filter(phone=phone).exists():
+        return Response({"error": "Phone number already registered"}, status=400)
+
+    try:
+        # Create new user with hashed password
+        user = User.objects.create(
+            name=name,
+            phone=phone,
+            email=email,
+            password=make_password(password)  # Hash password
+        )
+
+        # WhatsApp Notification
+        message = (
+            f"🔔 New User Registered - Shade 💚!\n\n"
+            f"👤 Name: {name}\n"
+            f"📞 Phone: {phone}\n"
+            f"📧 Email: {email if email else 'Not provided'}"
+        )
+
+        params = {
+            "secret": SECRET,
+            "account": ACCOUNT,
+            "recipient": ADMIN_PHONE,
+            "type": "text",
+            "message": message,
+            "priority": 1,
+        }
+
+        try:
+            requests.post(WHATSAPP_API_URL, params=params, timeout=5)
+        except Exception as e:
+            print("WhatsApp Error:", e)
+
+        return Response(
+            {
                 "message": "Registration successful",
                 "user": {
                     "id": user.id,
@@ -117,20 +208,26 @@ def register_visitor(request):
 
 
 # -------------------------------------------------------------------------
-# VISITOR LOGIN
+# USER LOGIN
 # -------------------------------------------------------------------------
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def user_login(request):
     phone = request.data.get("phone", "").strip()
+    password = request.data.get("password", "").strip()
 
-    if not phone:
-        return Response({"error": "Phone number is required"}, status=400)
+    if not phone or not password:
+        return Response({"error": "Phone and password are required"}, status=400)
 
     try:
         user = User.objects.get(phone=phone)
 
+        # Check password
+        if not check_password(password, user.password):
+            return Response({"error": "Invalid credentials"}, status=401)
+
+        # Store in session
         request.session["visitor_id"] = user.id
         request.session["visitor_name"] = user.name
 

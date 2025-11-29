@@ -1,34 +1,15 @@
 from django.db import models
-from django.contrib.auth.models import User as DjangoUser
 import os
 
-# --------------------- VISITOR/USER MODEL ---------------------
-class User(models.Model):
+# --------------------- VISITOR MODEL ---------------------
+class Visitor(models.Model):
     name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=15, unique=True)
+    phone = models.CharField(max_length=15)
     email = models.EmailField(blank=True, null=True)
-    password = models.CharField(max_length=255)  # ✅ ADDED PASSWORD FIELD
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
-
-
-# --------------------- LOGIN HISTORY MODEL ---------------------
-class LoginHistory(models.Model):
-    user = models.ForeignKey(DjangoUser, on_delete=models.CASCADE, related_name='shade_login_history', null=True, blank=True)
-    username = models.CharField(max_length=150)
-    login_time = models.DateTimeField(auto_now_add=True)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
-    user_agent = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=20, default='success')
-
-    class Meta:
-        ordering = ['-login_time']
-        verbose_name_plural = "Login Histories"
-
-    def __str__(self):
-        return f"{self.username} - {self.login_time.strftime('%Y-%m-%d %H:%M:%S')}"
 
 
 # --------------------- GALLERY - SMILES MODEL ---------------------

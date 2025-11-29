@@ -2,14 +2,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Visitor Registration
-    path('register/', views.register_visitor, name='register_visitor'),
+    # Visitor API
+    path('visitors/', views.visitor_list, name='visitor_list'),
     
     # Admin Login
     path('admin-login/', views.admin_login, name='admin_login'),
-
-
-    path('user-login/', views.user_login, name='user_login'),
     
     # Smiles
     path('smiles/', views.smile_list, name='smile_list'),

@@ -1,18 +1,12 @@
 from rest_framework import serializers
-from .models import User, Smile, OurClient, Ceremonial, LoginHistory, Demonstration
+from .models import Visitor, Smile, OurClient, Ceremonial, Demonstration
 
-# --------------------- USER SERIALIZER ---------------------
-class UserSerializer(serializers.ModelSerializer):
+
+# --------------------- VISITOR SERIALIZER ---------------------
+class VisitorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['id', 'name', 'phone', 'email', 'created_at']
-
-
-# --------------------- LOGIN HISTORY SERIALIZER ---------------------
-class LoginHistorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LoginHistory
-        fields = ['id', 'username', 'login_time', 'ip_address', 'user_agent', 'status']
+        model = Visitor
+        fields = '__all__'
 
 
 # --------------------- SMILE SERIALIZER ---------------------

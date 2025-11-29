@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-change-in-production'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1','shade.imcbs.com','www.shade.imcbs.com']
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', 'shade.imcbs.com', 'www.shade.imcbs.com']
 
 # Application definition
 INSTALLED_APPS = [
@@ -28,14 +28,14 @@ INSTALLED_APPS = [
 
 # MIDDLEWARE - CORS must be first!
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # 1st - MUST BE FIRST
+    'django.middleware.security.SecurityMiddleware',  # 2nd
+    'django.contrib.sessions.middleware.SessionMiddleware',  # 3rd
+    'django.middleware.common.CommonMiddleware',  # 4th
+    'django.middleware.csrf.CsrfViewMiddleware',  # 5th
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # 6th
+    'django.contrib.messages.middleware.MessageMiddleware',  # 7th
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',  # 8th
 ]
 
 ROOT_URLCONF = 'shade_backend.urls'
@@ -64,7 +64,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'shade_db',
         'USER': 'postgres',
-        'PASSWORD': 'info@imc',  
+        'PASSWORD': '12345',  # ✅ Your PostgreSQL password
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -94,6 +94,7 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files
 MEDIA_URL = '/media/'
@@ -121,9 +122,13 @@ REST_FRAMEWORK = {
 # ==========================================
 # CORS Configuration
 # ==========================================
+# For development - allow all origins
 CORS_ALLOW_ALL_ORIGINS = True
+
+# Allow credentials
 CORS_ALLOW_CREDENTIALS = True
 
+# Explicitly allow all methods
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -133,6 +138,7 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
+# Allow all headers
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -149,26 +155,26 @@ CORS_ALLOW_HEADERS = [
 # CSRF Configuration
 # ==========================================
 CSRF_TRUSTED_ORIGINS = [
-    "https://shade.imcbs.com"  
+    "https://shade.imcbs.com",
+    "https://www.shade.imcbs.com",
     "http://localhost:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
-    
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://shade.imcbs.com",  
+    "https://shade.imcbs.com",
+    "https://www.shade.imcbs.com",
     "http://localhost:5173",
     "http://localhost:5174",
-    
 ]
 
 # ==========================================
 # Session Configuration
 # ==========================================
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 86400
+SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS

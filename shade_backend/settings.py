@@ -64,7 +64,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'shade_db',
         'USER': 'postgres',
-        'PASSWORD': '12345',  # ✅ Your PostgreSQL password
+        'PASSWORD': 'info@imc',  # ✅ Your PostgreSQL password
         'HOST': 'localhost',
         'PORT': '5432',
     }
